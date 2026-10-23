@@ -14,3 +14,11 @@ __v0_jsx-dev-runtime.ts
 node_modules
 .next/
 .DS_Store
+
+# Echo Technology mod: Gradle/Loom outputs (builds run in /tmp via scripts/build-mod.sh)
+echo-technology/build/
+echo-technology/.gradle/
+echo-technology/run/
+echo-technology/out/
+echo-technology/.idea/
+echo-technology/*.iml
