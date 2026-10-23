@@ -8,9 +8,31 @@ credits running out mid-turn — is always visible to the next assistant.
 
 ## Resume prompt (user: paste this into the next chat)
 
-> Continue the Echo Technology Minecraft mod. First read `HANDOFF.md` in the project root, run
-> `bash scripts/setup-java.sh`, verify the last checkpoint still builds, then continue from "Next step".
-> Update HANDOFF.md after every checkpoint. Do not change the Minecraft version, loader, mod ID, or package.
+> Continue the Echo Technology Minecraft mod from GitHub repo `krushnahon99-netizen/echo-8n`, branch
+> `v0/echo-technology` (https://github.com/krushnahon99-netizen/echo-8n/tree/v0/echo-technology).
+> First read `HANDOFF.md` in the project root, run `bash scripts/setup-java.sh`, verify the last checkpoint
+> still builds, then continue from "Next step". Update HANDOFF.md after every checkpoint.
+> Do not change the Minecraft version, loader, mod ID, or package.
+
+## Repositories
+
+| Repo | Role |
+|---|---|
+| `krushnahon99-netizen/echo-8n` (public) | **This project**, connected to the v0 chat. v0 never commits to `main`; all work goes to branch `v0/echo-technology`. `main` changes only when the user merges a PR, so always check `v0/echo-technology` first. |
+| `krushnahon99-netizen/echo` (public) | Earlier attempt from 2026-10-22, **not connected**. Source for the CP1 import. Do not delete it until the import is done. |
+
+### Earlier attempt (`krushnahon99-netizen/echo`, folder `echo-technology/`)
+
+- 44 Java files in the same architecture: `registry/`, `block/`, `block/entity/`, `energy/` (`EchoEnergyStorage`,
+  `EnergyTransfer`, `EnergyNode`, `EnergyDistribution`), `machine/` (`ReactorCore`, `FabricatorCore`,
+  `ChargerCore`), `recipe/`, `screen/` handlers, client screens, `item/` (`EchoDrillItem`, `EchoScannerItem`,
+  `UpgradeItem`, `ChargeableItem`), `upgrade/`, `config/`, and an `EchoConduitBlock`. Includes a Gradle 8.14.3
+  wrapper. No tests.
+- Its own handoff says the skeleton built once; everything after that was written but never compiled, and the
+  build was left **broken** (missing referenced classes). Resources contain only `fabric.mod.json`: no textures,
+  models, blockstates, lang, recipes, or loot tables. No JAR was produced.
+- Its versions: Loom 1.11.8, Gradle 8.14.3, Yarn 1.21.1+build.3, Loader 0.16.14, Fabric API 0.116.7+1.21.1.
+  Not reviewed in this repo yet; treat all of it as unverified.
 
 ## Project in one paragraph
 
@@ -32,7 +54,8 @@ downloadable `.jar`. The credit budget is small: work in verified steps, avoid r
 | Fabric Loom | 1.11.8 | its Gradle module metadata requires Gradle API 8.14 |
 | Gradle wrapper | 8.14.3 | distribution URL responds 200 |
 
-The Loom 1.11.8 + Gradle 8.14.3 pair has not yet been proven by a real build; CP1 confirms it.
+The earlier attempt reports one successful skeleton build with Loom 1.11.8 + Gradle 8.14.3 in a v0 sandbox;
+CP1 confirms the pair in this repo.
 
 ## Checkpoints
 
@@ -42,7 +65,7 @@ Mod version = `0.<checkpoint>.0` (CP1 -> 0.1.0), so the newest JAR is obvious on
 | # | Scope | Status |
 |---|---|---|
 | CP0 | Handoff system, sandbox inspection, version verification, JDK setup script | DONE (2026-10-23) |
-| CP1 | Gradle project + wrapper, `fabric.mod.json`, entrypoints, one item + one block with textures, texture generator, `scripts/build-mod.sh`, first JAR, mobile download page | TODO <- next |
+| CP1 | Import `echo-technology/` from the earlier attempt, align versions, `scripts/build-mod.sh`, fix compile errors, minimum models/textures/lang for every registered block and item, first JAR, mobile download page | TODO <- next |
 | CP2 | Energy API (`EnergyStorage` + interfaces, unit tests); Echo Reactor block entity: fuel slot, generation, NBT, screen with synced energy bar | TODO |
 | CP3 | Push transfer to adjacent receivers; Echo Fabricator: inventory, 3+ recipes, energy per tick, progress bar, output-space checks, NBT, screen, tests | TODO |
 | CP4 | Echo Drill + Echo Scanner (item energy, cooldowns, server-side checks); Echo Charger as the second powered machine | TODO |
@@ -52,17 +75,21 @@ Mod version = `0.<checkpoint>.0` (CP1 -> 0.1.0), so the newest JAR is obvious on
 
 Budget priority if credits run low: CP1 -> CP2 -> CP3 (minimum playable loop) -> CP4 -> CP5 -> CP6 -> CP7.
 
+Code for CP2-CP5 partly exists in the imported earlier attempt. For those checkpoints, review, complete, and
+unit-test that code instead of rewriting it.
+
 ## Next step
 
-CP1:
-1. Create `echo-technology/` with `settings.gradle`, `build.gradle`, and `gradle.properties` using the versions
-   above, plus `org.gradle.jvmargs=-Xmx2G` (sandbox has 2 CPUs and 4 GB RAM).
-2. Generate the wrapper outside the project: download Gradle 8.14.3 into `/tmp`, run
-   `gradle wrapper --gradle-version 8.14.3` in an empty temp dir containing an empty `settings.gradle`, then
-   copy `gradlew`, `gradlew.bat`, and `gradle/wrapper/*` into `echo-technology/`.
-3. Add `fabric.mod.json`, `EchoTechnology` (main) and `EchoTechnologyClient` entrypoints, one item and one
-   block with generated textures, models, blockstate, lang, and loot table.
-4. Write `scripts/build-mod.sh` (see "Build rule"), build, fix errors, publish the JAR, add the download page.
+CP1 (revised 2026-10-23: reuse the earlier attempt instead of writing from scratch):
+1. Copy `echo-technology/` from `krushnahon99-netizen/echo` (branch `main`) into this repo, including its
+   Gradle wrapper. Do not copy its `HANDOFF.md` (this file supersedes it), but read its
+   "Yarn 1.21.1 API reminders" section once.
+2. Align `gradle.properties` with the verified table (Fabric API 0.116.17+1.21.1, Loader 0.19.5) and set
+   `org.gradle.jvmargs=-Xmx2G` (sandbox has 2 CPUs and 4 GB RAM; the import uses 2560m).
+3. Write `scripts/build-mod.sh` (see "Build rule"), build, and fix compile errors from the real output.
+   Check Yarn names with `javap` instead of guessing. After 3 failed rounds on one class, simplify it and log it.
+4. Add the minimum resources so every registered block and item has a model, texture, and lang entry, then
+   publish the JAR and add the download page.
 
 ## Locked design decisions (change only with a written reason here)
 
@@ -110,8 +137,9 @@ CP1:
    credits refill) continues exactly where work stopped.
 2. **This file:** what is done, what is next, decisions, and pitfalls, for any assistant.
 3. **v0 memory:** a note in the user's v0 memory points future v0 chats to this project and protocol.
-4. **Off-platform backup (optional):** connect a GitHub repository in v0 Settings so every change is pushed,
-   or use "Download ZIP". A GitHub Actions workflow could be added later to build the JAR in the cloud.
+4. **GitHub (connected 2026-10-23):** public repo `krushnahon99-netizen/echo-8n`; v0 pushes every turn to branch
+   `v0/echo-technology`. Anyone can read it without logging in, so any assistant can continue from it.
+   A GitHub Actions workflow could be added later to build the JAR in the cloud.
 5. **Last good JAR:** `public/downloads/` always keeps the latest working build, so an unfinished checkpoint never
    costs the user a playable version.
 
@@ -140,10 +168,16 @@ CP1:
 
 ## Known issues / blockers
 
-- None yet. Loom 1.11.8 + Gradle 8.14.3 is unproven until the CP1 build.
+- Loom 1.11.8 + Gradle 8.14.3 is unproven in this repo until the CP1 build (the earlier attempt built a skeleton
+  with it once).
+- The code to import in CP1 was never compiled as a whole; expect compile errors and missing classes.
 
 ## Session log (newest first)
 
+- 2026-10-23 — GitHub check — User connected public repo `krushnahon99-netizen/echo-8n`. Verified without
+  logging in: the repo is public, `main` @ 65a9026 matches v0, raw `HANDOFF.md` returns HTTP 200, no `.env` or
+  secret files are tracked (`.env*.local` is ignored), and v0 memory is not in the repo. Found the earlier
+  attempt in `krushnahon99-netizen/echo` and revised CP1 to import it. Work continues on branch `v0/echo-technology`.
 - 2026-10-23 — CP0 — Inspected sandbox: Amazon Linux 2023 x86_64, 2 CPUs, 4 GB RAM, 61 GB free disk, sudo + dnf
   available, network to Fabric, Mojang, Gradle, and Adoptium OK, Java missing. Verified versions above.
   Added `scripts/setup-java.sh` (installed Corretto 21.0.12.1; a second run confirmed it is idempotent) and
